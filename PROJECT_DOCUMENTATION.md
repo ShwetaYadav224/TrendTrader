@@ -131,40 +131,6 @@ cd trendtrader-dashboard/backend
 npm run seed
 ```
 
-## Environment Variables (.env)
-```env
-PORT=5001
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=trendtrader_db
-DB_PORT=3308
-```
-
-## Usage
-
-1. **Start Backend**: `cd backend && npm start`
-2. **Start Frontend**: `cd frontend && npm run dev`
-3. **Access Application**: Open http://localhost:5173
-4. **Use Data Input**: Click on "Add Product" or "Add Customer" tabs
-
-## Development Notes
-
-- Backend runs on port 5001
-- Frontend runs on port 5173 (or next available port)
-- CORS is enabled for frontend-backend communication
-- Database connection uses connection pooling for efficiency
-- Forms include loading states and success/error messages
-
-## Testing
-Use curl commands to test API endpoints:
-```bash
-# Test product creation
-curl -X POST -H "Content-Type: application/json" -d "{\"name\":\"Test Product\",\"category\":\"Electronics\",\"price\":99.99,\"cost\":50.00}" http://localhost:5001/api/products
-
-# View products
-curl http://localhost:5001/api/debug/products
-```
 
 ## Future Enhancements
 - Order creation interface
