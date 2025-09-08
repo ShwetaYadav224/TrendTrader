@@ -15,7 +15,7 @@ async function seed() {
   let connection;
   try {
     connection = await mysql.createConnection(dbConfig);
-    console.log('✅ Connected to the database!');
+    console.log(' Connected to the database!');
 
     // 1. Clear existing data (Important for re-running the script)
     await connection.execute('SET FOREIGN_KEY_CHECKS = 0');
@@ -89,11 +89,11 @@ async function seed() {
     }
     console.log('📋 Inserted orders and items.');
 
-    console.log('✅ Database seeded successfully!');
+    console.log(' Database seeded successfully!');
     process.exit(0);
 
   } catch (error) {
-    console.error('❌ Error seeding database:', error);
+    console.error('Error seeding database:', error);
     process.exit(1);
   } finally {
     if (connection) await connection.end();
