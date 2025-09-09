@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import DataInputInterface from './components/DataInputInterface';
+import DataView from './components/DataView';
 
 function App() {
   const [message, setMessage] = useState('');
@@ -82,12 +83,18 @@ function App() {
         >
           📊 Dashboard
         </button>
-        
+        <button
+          className={activeTab === 'view' ? 'active' : ''}
+          onClick={() => setActiveTab('view')}
+        >
+          👁️ View Data
+        </button>
       </nav>
 
       <main className="main-content">
         {activeTab === 'dashboard' && renderDashboard()}
         {activeTab === 'data' && <DataInputInterface />}
+        {activeTab === 'view' && <DataView />}
       </main>
     </div>
   );

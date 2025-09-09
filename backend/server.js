@@ -22,11 +22,11 @@ const pool = mysql.createPool({
 // Test database connection on startup
 pool.getConnection()
   .then(connection => {
-    console.log('✅ Database connected successfully!');
+    console.log(' Database connected successfully!');
     connection.release();
   })
   .catch(error => {
-    console.error('❌ Database connection failed:', error.message);
+    console.error(' Database connection failed:', error.message);
     console.log('Please check your database configuration in .env file');
   });
 
@@ -56,8 +56,8 @@ app.get('/api/total-sales', async (req, res) => {
     const numericTotalSales = totalSales === null || totalSales === undefined ? 0 : Number(totalSales);
     res.json({ total_sales: numericTotalSales });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch total sales" });
+    console.error('Total sales error:', error);
+    res.status(500).json({ error: "Failed to fetch total sales: " + error.message });
   }
 });
 
@@ -71,8 +71,8 @@ app.post('/api/products', async (req, res) => {
     );
     res.status(201).json({ message: 'Product created successfully', id: result.insertId });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to create product" });
+    console.error('Create product error:', error);
+    res.status(500).json({ error: "Failed to create product: " + error.message });
   }
 });
 
@@ -86,8 +86,8 @@ app.post('/api/customers', async (req, res) => {
     );
     res.status(201).json({ message: 'Customer created successfully', id: result.insertId });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to create customer" });
+    console.error('Create customer error:', error);
+    res.status(500).json({ error: "Failed to create customer: " + error.message });
   }
 });
 
@@ -101,8 +101,8 @@ app.post('/api/orders', async (req, res) => {
     );
     res.status(201).json({ message: 'Order created successfully', id: result.insertId });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to create order" });
+    console.error('Create order error:', error);
+    res.status(500).json({ error: "Failed to create order: " + error.message });
   }
 });
 
@@ -116,8 +116,8 @@ app.post('/api/order-items', async (req, res) => {
     );
     res.status(201).json({ message: 'Order item created successfully', id: result.insertId });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to create order item" });
+    console.error('Create order item error:', error);
+    res.status(500).json({ error: "Failed to create order item: " + error.message });
   }
 });
 
@@ -127,8 +127,8 @@ app.get('/api/debug/products', async (req, res) => {
     const [results] = await pool.execute('SELECT * FROM products ORDER BY id DESC LIMIT 10');
     res.json(results);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch products" });
+    console.error('Debug products error:', error);
+    res.status(500).json({ error: "Failed to fetch products: " + error.message });
   }
 });
 
@@ -138,8 +138,50 @@ app.get('/api/debug/customers', async (req, res) => {
     const [results] = await pool.execute('SELECT * FROM customers ORDER BY id DESC LIMIT 10');
     res.json(results);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch customers" });
+    console.error('Debug customers error:', error);
+    res.status(500).json({ error: "Failed to fetch customers: " + error.message });
+  }
+});
+
+// Delete customer endpoint
+app.delete('/api/customers/:id', async (req, res) => {
+  try {
+    const customerId = req.params.id;
+    const [result] = await pool.execute('DELETE FROM customers WHERE id = ?', [customerId]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Customer not found" });
+    }
+    
+    res.json({ message: 'Customer deleted successfully' });
+  } catch (error) {
+    console.error('Delete customer error:', error);
+    if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.errno === 1451) {
+      res.status(400).json({ error: "Cannot delete customer - they have existing orders. Delete orders first or use cascade delete." });
+    } else {
+      res.status(500).json({ error: "Failed to delete customer: " + error.message });
+    }
+  }
+});
+
+// Delete product endpoint
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const [result] = await pool.execute('DELETE FROM products WHERE id = ?', [productId]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Delete product error:', error);
+    if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.errno === 1451) {
+      res.status(400).json({ error: "Cannot delete product - it is referenced in existing orders. Delete order items first or use cascade delete." });
+    } else {
+      res.status(500).json({ error: "Failed to delete product: " + error.message });
+    }
   }
 });
 

@@ -40,6 +40,14 @@ export default {
       return handleDebugCustomers(env);
     }
 
+    if (path.startsWith('/api/customers/') && request.method === 'DELETE') {
+      return handleDeleteCustomer(request, env);
+    }
+
+    if (path.startsWith('/api/products/') && request.method === 'DELETE') {
+      return handleDeleteProduct(request, env);
+    }
+
     // Default 404 response
     return new Response('Not Found', { status: 404 });
   },
@@ -166,6 +174,94 @@ async function handleDebugProducts(env) {
     return new Response(JSON.stringify({ error: "Failed to fetch products" }), {
       status: 500,
       headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+  }
+}
+
+async function handleDeleteCustomer(request, env) {
+  try {
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const customerId = pathParts[pathParts.length - 1];
+    
+    const db = env.DB;
+    
+    const result = await db.prepare(`
+      DELETE FROM customers WHERE id = ?
+    `).bind(customerId).run();
+    
+    if (result.meta.rows_read === 0) {
+      return new Response(JSON.stringify({ error: "Customer not found" }), {
+        status: 404,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+    
+    return new Response(JSON.stringify({ message: 'Customer deleted successfully' }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+  } catch (error) {
+    console.error('Error deleting customer:', error);
+    let errorMessage = "Failed to delete customer";
+    if (error.message && error.message.includes('FOREIGN KEY constraint failed')) {
+      errorMessage = "Cannot delete customer - they have existing orders";
+    }
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+  }
+}
+
+async function handleDeleteProduct(request, env) {
+  try {
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const productId = pathParts[pathParts.length - 1];
+    
+    const db = env.DB;
+    
+    const result = await db.prepare(`
+      DELETE FROM products WHERE id = ?
+    `).bind(productId).run();
+    
+    if (result.meta.rows_read === 0) {
+      return new Response(JSON.stringify({ error: "Product not found" }), {
+        status: 404,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+    
+    return new Response(JSON.stringify({ message: 'Product deleted successfully' }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    let errorMessage = "Failed to delete product";
+    if (error.message && error.message.includes('FOREIGN KEY constraint failed')) {
+      errorMessage = "Cannot delete product - it is referenced in existing orders";
+    }
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       }
