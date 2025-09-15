@@ -345,7 +345,7 @@
 .data-table table {
   width: 100%;
   border-collapse: collapse;
-  background: rgba(172, 148, 148, 0.82);
+  background: rgba(172, 148, 158, 0.82);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
